@@ -1,9 +1,7 @@
 import asyncio
 import os
 import logging
-import uvicorn
-from fastapi import FastAPI
-from contextlib import asynccontextmanager
+from aiohttp import web
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 
@@ -154,17 +152,21 @@ async def payment_success_handler(message: types.Message):
         parse_mode="HTML"
     )
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    asyncio.create_task(dp.start_polling(bot, drop_pending_updates=True))
-    yield
+async def handle_ping(request):
+    return web.Response(text="Bot is running!")
 
-app = FastAPI(lifespan=lifespan)
-
-@app.get("/")
-def read_root():
-    return {"status": "ok", "bot": "running"}
+async def main():
+    # Render талаб қиладиган портни (10000) очамиз
+    app = web.Application()
+    app.router.add_get("/", handle_ping)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 10000))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    
+    # Ботни ишга туширамиз
+    await dp.start_polling(bot, drop_pending_updates=True)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    asyncio.run(main())
