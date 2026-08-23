@@ -1,17 +1,20 @@
 import asyncio
 import os
 import logging
+from aiohttp import web
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 
 logging.basicConfig(level=logging.INFO)
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
+# Бот ва тўлов токенлари
+BOT_TOKEN = os.environ.get("BOT_TOKEN") or "8849345672:AAEaKO6YYMyKCoGvS2XrDdRDLIvOoM03LnA"
 PAYMENT_TOKEN = os.environ.get("PAYMENT_TOKEN", "398062629:TEST:99999999_f50bb3b37803e1e4")
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+# 4 та маҳсулот маълумотлари (нархлари 10 000 - 12 000 сўм)
 PRODUCTS = {
     "aurum_shelf": {
         "title": "«Aurum» премиум стеллажи",
@@ -151,7 +154,21 @@ async def payment_success_handler(message: types.Message):
         parse_mode="HTML"
     )
 
+# Render талаб қиладиган веб-сервер қисми
+async def handle_ping(request):
+    return web.Response(text="Bot is live and running!")
+
+async def start_web_server():
+    app = web.Application()
+    app.router.add_get("/", handle_ping)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 8080))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+
 async def main():
+    await start_web_server()
     await dp.start_polling(bot, drop_pending_updates=True)
 
 if __name__ == "__main__":
