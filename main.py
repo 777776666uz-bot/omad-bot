@@ -13,9 +13,11 @@ PAYMENT_TOKEN = os.environ.get("PAYMENT_TOKEN", "398062629:TEST:99999999_f50bb3b
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+# Ҳар бир маҳсулотнинг расми (photo) ва батафсил маълумотлари
 PRODUCTS = {
     "aurum_shelf": {
         "title": "«Aurum» премиум стеллажи",
+        "photo": "https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?w=800&q=80",
         "desc": (
             "✨ <b>«Aurum»</b> — премиум стеллаж!\n\n"
             "📐 <b>Ўлчамлари:</b> 180 x 80 x 30 см\n"
@@ -29,6 +31,7 @@ PRODUCTS = {
     },
     "vogue_rack": {
         "title": "«Vogue Rack» премиум гардероб",
+        "photo": "https://images.unsplash.com/photo-1558997519-83ea9252def8?w=800&q=80",
         "desc": (
             "✨ <b>«Vogue Rack»</b> — LED ёритгичли гардероб вешалкаси!\n\n"
             "📐 <b>Ўлчамлари:</b> 180 x 120 x 40 см\n"
@@ -41,6 +44,7 @@ PRODUCTS = {
     },
     "veragold_console": {
         "title": "«Veragold» премиум консол столи",
+        "photo": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80",
         "desc": (
             "✨ <b>«Veragold»</b> — Премиум консол столи!\n\n"
             "📐 <b>Ўлчамлари:</b> 115 x 85 x 30 см\n"
@@ -54,6 +58,7 @@ PRODUCTS = {
     },
     "avva_console": {
         "title": "«AVVA» консоль столи",
+        "photo": "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=800&q=80",
         "desc": (
             "✨ <b>«AVVA»</b> — Премиум консоль столи!\n\n"
             "📐 <b>Ўлчамлари:</b> 1300 x 380 x 820 мм\n"
@@ -66,6 +71,8 @@ PRODUCTS = {
         "current_ticket": 1
     }
 }
+
+MAIN_BANNER = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"
 
 @dp.message(Command("start"))
 async def start_handler(message: types.Message):
@@ -82,7 +89,7 @@ async def start_handler(message: types.Message):
             callback_data=f"sel_{p_id}"
         )])
     kb = types.InlineKeyboardMarkup(inline_keyboard=buttons)
-    await message.answer(text, reply_markup=kb, parse_mode="HTML")
+    await message.answer_photo(photo=MAIN_BANNER, caption=text, reply_markup=kb, parse_mode="HTML")
 
 @dp.callback_query(F.data.startswith("sel_"))
 async def select_product_handler(callback: types.CallbackQuery):
@@ -101,11 +108,28 @@ async def select_product_handler(callback: types.CallbackQuery):
         [types.InlineKeyboardButton(text="🎟 Чипта сотиб олиш", callback_data=f"pay_{p_id}")],
         [types.InlineKeyboardButton(text="⬅️ Ортга қайтиш", callback_data="back_cat")]
     ])
-    await callback.message.edit_text(text, reply_markup=kb, parse_mode="HTML")
+    
+    # Расм ва матнни янгилаймиз
+    media = types.InputMediaPhoto(media=p_data["photo"], caption=text, parse_mode="HTML")
+    await callback.message.edit_media(media=media, reply_markup=kb)
 
 @dp.callback_query(F.data == "back_cat")
 async def back_cat_handler(callback: types.CallbackQuery):
-    await start_handler(callback.message)
+    text = (
+        f"🎁 <b>Ютуқли премиум мебеллар акцияси:</b>\n\n"
+        f"Иштирок этиш учун совринни танланг:"
+    )
+    buttons = []
+    for p_id, p_data in PRODUCTS.items():
+        left = p_data["max_tickets"] - p_data["current_ticket"] + 1
+        buttons.append([types.InlineKeyboardButton(
+            text=f"✨ {p_data['title']} — {p_data['price']:,} сўм ({left} та қолди)",
+            callback_data=f"sel_{p_id}"
+        )])
+    kb = types.InlineKeyboardMarkup(inline_keyboard=buttons)
+    
+    media = types.InputMediaPhoto(media=MAIN_BANNER, caption=text, parse_mode="HTML")
+    await callback.message.edit_media(media=media, reply_markup=kb)
 
 @dp.callback_query(F.data.startswith("pay_"))
 async def invoice_handler(callback: types.CallbackQuery):
@@ -124,6 +148,10 @@ async def invoice_handler(callback: types.CallbackQuery):
             provider_token=PAYMENT_TOKEN,
             currency="UZS",
             prices=[types.LabeledPrice(label="1 та чипта", amount=amount_tiyin)],
+            photo_url=p_data["photo"],
+            photo_size=512,
+            photo_width=512,
+            photo_height=512,
             start_parameter="furniture_lottery"
         )
     except Exception as e:
@@ -156,7 +184,6 @@ async def handle_ping(request):
     return web.Response(text="Bot is running!")
 
 async def main():
-    # Render талаб қиладиган портни (10000) очамиз
     app = web.Application()
     app.router.add_get("/", handle_ping)
     runner = web.AppRunner(app)
@@ -165,7 +192,6 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
     
-    # Ботни ишга туширамиз
     await dp.start_polling(bot, drop_pending_updates=True)
 
 if __name__ == "__main__":
