@@ -31,7 +31,7 @@ PRODUCTS = {
     },
     "vogue_rack": {
         "title": "«Vogue Rack» премиум гардероб",
-        "photo": "https://images.unsplash.com/photo-1558997519-83ea9252def8?w=800&q=80",
+        "photo": "https://i.postimg.cc/TYGG0V6f/Screenshot-20260823-142549-Google.jpg ",
         "desc": (
             "✨ <b>«Vogue Rack»</b> — LED ёритгичли гардероб вешалкаси!\n\n"
             "📐 <b>Ўлчамлари:</b> 180 x 120 x 40 см\n"
@@ -44,7 +44,7 @@ PRODUCTS = {
     },
     "veragold_console": {
         "title": "«Veragold» премиум консол столи",
-        "photo": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80",
+        "photo": https://i.postimg.cc/dVkWTfxn/Screenshot-20260823-142615-Google.jpg ",
         "desc": (
             "✨ <b>«Veragold»</b> — Премиум консол столи!\n\n"
             "📐 <b>Ўлчамлари:</b> 115 x 85 x 30 см\n"
@@ -58,7 +58,7 @@ PRODUCTS = {
     },
     "avva_console": {
         "title": "«AVVA» консоль столи",
-        "photo": "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=800&q=80",
+        "photo": "https://i.postimg.cc/Dw9xQgVF/Screenshot-20260823-142656-Google.jpg ",
         "desc": (
             "✨ <b>«AVVA»</b> — Премиум консоль столи!\n\n"
             "📐 <b>Ўлчамлари:</b> 1300 x 380 x 820 мм\n"
